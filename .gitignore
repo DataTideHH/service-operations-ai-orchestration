@@ -1,0 +1,6 @@
+target/
+.idea/
+*.iml
+.vscode/
+*.log
+evidence/runs/*.md
