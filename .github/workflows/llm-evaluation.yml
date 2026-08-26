@@ -29,6 +29,7 @@ jobs:
       APP_EVALUATION_PROVIDER: ${{ inputs.provider }}
       APP_EVALUATION_MODEL: ${{ inputs.model }}
       APP_EVALUATION_OUTPUT_DIRECTORY: evidence/runs
+      APP_EVALUATION_SOURCE_REVISION: ${{ github.sha }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-java@v5
@@ -36,7 +37,7 @@ jobs:
           distribution: temurin
           java-version: "21"
           cache: maven
-      - name: Build deterministic V1/V2 checks
+      - name: Build deterministic V1/V2/V3 checks
         run: ./mvnw --batch-mode --no-transfer-progress verify
       - name: Run model-dependent evaluation
         id: evaluation
@@ -60,7 +61,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: llm-evaluation-${{ inputs.provider }}-${{ inputs.model }}
-          path: evidence/runs/evaluation-report.md
+          path: |
+            evidence/runs/evaluation-report.md
+            evidence/runs/evaluation-report.json
           if-no-files-found: error
       - name: Enforce evaluation outcome
         if: steps.evaluation.outcome != 'success'

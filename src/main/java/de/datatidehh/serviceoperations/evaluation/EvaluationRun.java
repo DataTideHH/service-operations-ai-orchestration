@@ -1,12 +1,9 @@
 package de.datatidehh.serviceoperations.evaluation;
 
-import java.time.Instant;
 import java.util.List;
 
 public record EvaluationRun(
-        String provider,
-        String model,
-        Instant runAt,
+        EvaluationRunManifest manifest,
         List<EvaluationCaseResult> results) {
 
     public EvaluationRun {

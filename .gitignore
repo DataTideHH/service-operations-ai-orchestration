@@ -4,3 +4,4 @@ target/
 .vscode/
 *.log
 evidence/runs/*.md
+evidence/runs/*.json

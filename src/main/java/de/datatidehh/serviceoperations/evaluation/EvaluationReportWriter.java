@@ -11,12 +11,23 @@ import java.nio.file.Path;
 @Component
 public class EvaluationReportWriter {
 
-    public Path write(EvaluationRun run, Path outputDirectory) {
+    private final EvaluationJsonCodec jsonCodec;
+    private final EvaluationReportValidator validator;
+
+    public EvaluationReportWriter(EvaluationJsonCodec jsonCodec, EvaluationReportValidator validator) {
+        this.jsonCodec = jsonCodec;
+        this.validator = validator;
+    }
+
+    public EvaluationReportArtifacts write(EvaluationRun run, Path outputDirectory) {
         try {
             Files.createDirectories(outputDirectory);
-            Path report = outputDirectory.resolve("evaluation-report.md");
-            Files.writeString(report, render(run), StandardCharsets.UTF_8);
-            return report;
+            Path markdown = outputDirectory.resolve("evaluation-report.md");
+            Path json = outputDirectory.resolve("evaluation-report.json");
+            Files.writeString(markdown, render(run), StandardCharsets.UTF_8);
+            Files.writeString(json, jsonCodec.write(run), StandardCharsets.UTF_8);
+            validator.readAndValidate(json);
+            return new EvaluationReportArtifacts(markdown, json);
         }
         catch (IOException exception) {
             throw new UncheckedIOException("Could not write evaluation report", exception);
@@ -24,13 +35,30 @@ public class EvaluationReportWriter {
     }
 
     String render(EvaluationRun run) {
+        EvaluationRunManifest manifest = run.manifest();
         StringBuilder markdown = new StringBuilder()
-                .append("# V2 LLM evaluation report\n\n")
-                .append("- Provider: `").append(run.provider()).append("`\n")
-                .append("- Model: `").append(run.model()).append("`\n")
-                .append("- Run at: `").append(run.runAt()).append("`\n")
+                .append("# V3 governed LLM evaluation report\n\n")
+                .append("- Schema: `").append(manifest.schemaVersion()).append("`\n")
+                .append("- Application: `").append(manifest.applicationVersion()).append("`\n")
+                .append("- Provider: `").append(manifest.provider()).append("`\n")
+                .append("- Model: `").append(manifest.model()).append("`\n")
+                .append("- Source revision: `").append(manifest.sourceRevision()).append("`\n")
+                .append("- Run at: `").append(manifest.runAt()).append("`\n")
                 .append("- Result: **").append(run.passed() ? "PASS" : "FAIL").append("** (")
-                .append(run.passedCount()).append('/').append(run.results().size()).append(")\n\n");
+                .append(run.passedCount()).append('/').append(run.results().size()).append(")\n\n")
+                .append("## Prompt versions\n\n");
+
+        manifest.promptVersions().entrySet().stream()
+                .sorted(java.util.Map.Entry.comparingByKey())
+                .forEach(entry -> markdown.append("- `").append(entry.getKey()).append("`: `")
+                        .append(entry.getValue()).append("`\n"));
+        markdown.append("\n## Governed resource fingerprints\n\n");
+
+        manifest.resourceFingerprints().entrySet().stream()
+                .sorted(java.util.Map.Entry.comparingByKey())
+                .forEach(entry -> markdown.append("- `").append(entry.getKey()).append("`: `")
+                        .append(entry.getValue()).append("`\n"));
+        markdown.append('\n');
 
         for (EvaluationCaseResult result : run.results()) {
             EvaluationCase evaluationCase = result.evaluationCase();
