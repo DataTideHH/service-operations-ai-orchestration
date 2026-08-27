@@ -19,7 +19,7 @@ class OfflineEvaluationServiceTest {
         EvaluationRun run = evaluationService.createRun(Instant.parse("2026-08-27T08:00:00Z"));
 
         assertThat(run.manifest().provider()).isEqualTo("offline-simulation");
-        assertThat(run.manifest().model()).isEqualTo("deterministic-reference-v1");
+        assertThat(run.manifest().model()).isEqualTo("deterministic-reference-v2");
         assertThat(run.passed()).isTrue();
         assertThat(run.results()).hasSize(4).allSatisfy(result -> {
             assertThat(result.toolInvocations()).singleElement()

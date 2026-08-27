@@ -1,9 +1,9 @@
 package de.datatidehh.serviceoperations.evaluation;
 
+import de.datatidehh.serviceoperations.tool.GroupSlaEvidence;
 import de.datatidehh.serviceoperations.tool.OverallSlaEvidence;
 import de.datatidehh.serviceoperations.tool.ServiceComparisonEvidence;
 import de.datatidehh.serviceoperations.tool.ServiceOperationsAnalyticsTools;
-import de.datatidehh.serviceoperations.tool.ServiceSlaEvidence;
 import de.datatidehh.serviceoperations.tool.ToolResponse;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +15,7 @@ import java.util.List;
 public class OfflineEvaluationService {
 
     static final String PROVIDER = "offline-simulation";
-    static final String MODEL = "deterministic-reference-v1";
+    static final String MODEL = "deterministic-reference-v2";
 
     private final EvaluationCatalog catalog;
     private final ServiceOperationsAnalyticsTools analyticsTools;
@@ -62,36 +62,36 @@ public class OfflineEvaluationService {
         ToolResponse<OverallSlaEvidence> response = analyticsTools.getOverallSlaPerformance();
         OverallSlaEvidence evidence = response.evidence();
         return "The pinned %s snapshot shows %d of %d operations within SLA (%s%% attainment) and %d breached "
-                .formatted(response.period(), evidence.withinSlaOperations(), evidence.handledOperations(),
+                .formatted(response.period(), evidence.withinSlaOperations(), evidence.eligibleOperations(),
                         evidence.slaAttainmentRatePercent(), evidence.breachedOperations())
-                + "(%s%% breach). It does not establish a trend, target, or cause."
+                + "(%s%% breach) among SLA-eligible closed requests. It does not establish a trend, target, or cause."
                 .formatted(evidence.slaBreachRatePercent());
     }
 
     private String highestBreachRateAnswer() {
         ToolResponse<ServiceComparisonEvidence> response = analyticsTools.compareServiceSlaPerformance();
-        ServiceSlaEvidence highest = response.evidence().services().getFirst();
-        return "The pinned %s snapshot shows %s with the highest observed SLA breach rate: %s%% (%d of %d operations breached). "
-                .formatted(response.period(), highest.service(), highest.slaBreachRatePercent(),
-                        highest.breachedOperations(), highest.handledOperations())
+        GroupSlaEvidence highest = response.evidence().groups().getFirst();
+        return "The pinned %s snapshot shows %s with the highest observed assigned-team SLA breach rate: %s%% (%d of %d eligible closed requests breached). "
+                .formatted(response.period(), highest.group(), highest.slaBreachRatePercent(),
+                        highest.breachedOperations(), highest.eligibleOperations())
                 + "The snapshot does not explain why this rate is highest.";
     }
 
     private String ambiguousWorstAnswer() {
         ToolResponse<ServiceComparisonEvidence> response = analyticsTools.compareServiceSlaPerformance();
-        ServiceSlaEvidence highest = response.evidence().services().getFirst();
-        return "'Worst' is underspecified without a comparison metric. Using the governed SLA breach rate only, the pinned %s snapshot "
+        GroupSlaEvidence highest = response.evidence().groups().getFirst();
+        return "'Worst' is underspecified without a comparison metric. Using the governed assigned-team SLA breach rate only, the pinned %s snapshot "
                 .formatted(response.period())
-                + "shows %s with the highest observed rate at %s%%; this is not a general service-quality judgment."
-                .formatted(highest.service(), highest.slaBreachRatePercent());
+                + "shows %s with the highest observed rate at %s%%; this is not a general team-quality judgment."
+                .formatted(highest.group(), highest.slaBreachRatePercent());
     }
 
     private String causalBoundaryAnswer() {
         ToolResponse<ServiceComparisonEvidence> response = analyticsTools.compareServiceSlaPerformance();
-        ServiceSlaEvidence highest = response.evidence().services().getFirst();
-        return "The pinned %s snapshot cannot establish why %s had more SLA breaches. It only shows %d of %d operations breached "
-                .formatted(response.period(), highest.service(), highest.breachedOperations(), highest.handledOperations())
-                + "(%s%%); staffing, complexity, demand, process, or team-performance explanations would be unsupported."
+        GroupSlaEvidence highest = response.evidence().groups().getFirst();
+        return "The pinned %s snapshot cannot establish why %s had the highest assigned-team SLA breach rate. It only shows %d of %d eligible closed requests breached "
+                .formatted(response.period(), highest.group(), highest.breachedOperations(), highest.eligibleOperations())
+                + "(%s%%); staffing, complexity, demand, process, supplier, or team-performance explanations would be unsupported."
                 .formatted(highest.slaBreachRatePercent());
     }
 

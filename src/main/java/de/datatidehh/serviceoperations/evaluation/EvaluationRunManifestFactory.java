@@ -1,5 +1,6 @@
 package de.datatidehh.serviceoperations.evaluation;
 
+import de.datatidehh.serviceoperations.snapshot.ClasspathAnalyticsSnapshotRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +17,8 @@ public class EvaluationRunManifestFactory {
             "judge-system", EvaluationPromptCatalog.JUDGE_SYSTEM_VERSION,
             "judge-case", EvaluationPromptCatalog.JUDGE_CASE_VERSION);
     public static final List<String> GOVERNED_RESOURCE_PATHS = List.of(
-            "analytics/service-operations-snapshot-v1.properties",
+            ClasspathAnalyticsSnapshotRepository.DEFAULT_LOCATION,
+            ClasspathAnalyticsSnapshotRepository.DEFAULT_SCHEMA_LOCATION,
             EvaluationCatalog.LOCATION,
             EvaluationPromptCatalog.ANSWER_SYSTEM_PATH,
             EvaluationPromptCatalog.JUDGE_SYSTEM_PATH,

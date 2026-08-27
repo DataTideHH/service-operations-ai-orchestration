@@ -5,7 +5,8 @@ import java.math.BigDecimal;
 public record OverallSlaEvidence(
         String metric,
         String definition,
-        int handledOperations,
+        String eligiblePopulation,
+        int eligibleOperations,
         int withinSlaOperations,
         int breachedOperations,
         BigDecimal slaAttainmentRatePercent,

@@ -19,5 +19,7 @@ class EvaluationCatalogTest {
                         "04-causal-boundary");
         assertThat(cases).allMatch(value -> !value.expectedTool().isBlank());
         assertThat(cases).allMatch(value -> !value.expectedInterpretation().isBlank());
+        assertThat(cases.getFirst().expectedInterpretation()).contains("799 of 833", "95.92%", "4.08%");
+        assertThat(cases.get(1).expectedInterpretation()).contains("network_ops", "9 of 129", "6.98%");
     }
 }

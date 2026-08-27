@@ -16,7 +16,7 @@ public class EvaluationComparisonWriter {
             Files.createDirectories(outputDirectory);
             Path output = outputDirectory.resolve("evaluation-comparison.md");
             String markdown = """
-                    # V3 evaluation comparison
+                    # Governed evaluation comparison
 
                     - Baseline: `%s` / `%s` at `%s`
                     - Candidate: `%s` / `%s` at `%s`

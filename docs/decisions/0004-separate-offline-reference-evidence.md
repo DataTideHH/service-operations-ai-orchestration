@@ -8,7 +8,7 @@ Accepted after V3.
 
 The application provides an `artifact-command=simulate` mode that executes all four evaluation cases through the governed Java tools and writes the same Markdown and JSON artifact formats as a provider-backed run. Its manifest uses provider `offline-simulation` and model `deterministic-reference-v1`.
 
-The answers and assessments in this mode are curated deterministic references. They validate tool execution, report generation, JSON round-trip validation, and offline comparison, but they do not measure model behavior or prompt quality. Committed simulations live under `evidence/offline-reference/`; real provider observations remain under `evidence/runs/` or in workflow artifacts.
+The answers and assessments in this mode are curated deterministic references. They validate tool execution, report generation, JSON round-trip validation, and offline comparison, but they do not measure model behavior or prompt quality. Version-specific simulations live under `evidence/offline-reference-v*/`; real provider observations remain under `evidence/runs/` or in workflow artifacts.
 
 ## Consequences
 
