@@ -30,6 +30,8 @@ Both tools use SLA-eligible closed requests as their denominator. The assigned-t
 
 ## Pinned analytics handoff
 
+![Governed versioned analytics handoff from the producer repository to the AI orchestration consumer](docs/images/governed-analytics-handoff.svg)
+
 The source snapshot is [`ai-service-operations-snapshot-v1.json`](src/main/resources/analytics/ai-service-operations-snapshot-v1.json), validated against the committed [`JSON Schema`](src/main/resources/contracts/ai-service-operations-snapshot-v1.schema.json). It is an exact copy of the producer artifact.
 
 The tool contract is `2.0.0`, and the comparison dimension is explicitly `assigned_team`. Java independently derives rates from integer counts, reconciles team and overall totals, verifies unique groups and breach-rate ordering, and exposes the reviewed upstream fingerprints.
@@ -47,6 +49,8 @@ Requirement: Java 21+. The repository includes the Maven Wrapper.
 Normal tests and CI do not call an LLM. They verify the schema, snapshot reconciliation, rate derivation, exact two-tool surface, contract metadata, provenance, ordering, and interpretation boundary.
 
 ## Credential-free pipeline check
+
+![Credential-free pipeline verification and the separate prepared live-provider evaluation flow](docs/images/evaluation-modes.svg)
 
 The offline simulation executes all four cases through the real governed Java tools and produces Markdown and JSON artifacts with provider `offline-simulation` and model `deterministic-reference-v2`.
 
