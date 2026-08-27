@@ -2,6 +2,9 @@ package de.datatidehh.serviceoperations.evaluation;
 
 import org.junit.jupiter.api.Test;
 
+import java.nio.file.Path;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class EvaluationReportValidatorTest {
@@ -27,5 +30,14 @@ class EvaluationReportValidatorTest {
         assertThatThrownBy(() -> validator.validate(invalid))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("unsupported schema version");
+    }
+
+    @Test
+    void continuesToValidateTheHistoricalV3Baseline() {
+        EvaluationRun historical = validator.readAndValidate(
+                Path.of("evidence/offline-reference-v3/evaluation-report.json"));
+
+        assertThat(historical.manifest().applicationVersion()).isEqualTo("0.3.0");
+        assertThat(historical.passed()).isTrue();
     }
 }

@@ -39,7 +39,7 @@ public class EvaluationReportComparisonRunner implements CommandLineRunner {
         EvaluationRun candidate = validator.readAndValidate(candidateReport);
         EvaluationComparison comparison = comparator.compare(baseline, candidate);
         Path output = writer.write(baseline, candidate, comparison, outputDirectory);
-        System.out.printf("V3 comparison: %s. Report: %s%n",
+        System.out.printf("Governed comparison: %s. Report: %s%n",
                 comparison.passed() ? "PASS" : "FAIL", output.toAbsolutePath());
         if (!comparison.passed()) {
             throw new IllegalStateException("Evaluation comparison contains regressions or incompatible evidence; see " + output);
