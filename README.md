@@ -80,6 +80,33 @@ java -jar target/service-operations-ai-orchestration-0.3.0-SNAPSHOT.jar `
 
 The comparison writes `evidence/runs/evaluation-comparison.md`. It fails for incompatible governed inputs or when a baseline pass becomes a candidate failure. Validation and comparison are deterministic and cost-free.
 
+### Run the complete pipeline without API credits
+
+The offline simulation executes the four cases through the real governed Java tools and produces the same report formats with provider `offline-simulation` and model `deterministic-reference-v1`. Its answers and assessments are curated references, not LLM observations, so this verifies the pipeline rather than model quality.
+
+```powershell
+$revision = git rev-parse HEAD
+java -jar target/service-operations-ai-orchestration-0.3.0-SNAPSHOT.jar `
+  --app.evaluation.artifact-command=simulate `
+  --app.evaluation.source-revision=$revision `
+  --app.evaluation.offline-run-at=2026-08-27T08:00:00Z `
+  --app.evaluation.output-directory=evidence/offline-reference
+```
+
+The generated JSON can then be validated and compared with itself as a smoke test:
+
+```powershell
+java -jar target/service-operations-ai-orchestration-0.3.0-SNAPSHOT.jar `
+  --app.evaluation.artifact-command=validate `
+  --app.evaluation.artifact-report=evidence/offline-reference/evaluation-report.json
+
+java -jar target/service-operations-ai-orchestration-0.3.0-SNAPSHOT.jar `
+  --app.evaluation.artifact-command=compare `
+  --app.evaluation.artifact-baseline=evidence/offline-reference/evaluation-report.json `
+  --app.evaluation.artifact-report=evidence/offline-reference/evaluation-report.json `
+  --app.evaluation.output-directory=evidence/offline-reference
+```
+
 ## Pinned evidence
 
 The source snapshot is [`service-operations-snapshot-v1.properties`](src/main/resources/analytics/service-operations-snapshot-v1.properties). Rates are derived from integer counts in Java so a stored percentage cannot disagree with its numerator and denominator. Updating evidence is a versioned change: replace the snapshot, reconcile totals, and revise the contract version when semantics change.
