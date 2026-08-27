@@ -37,7 +37,7 @@ public class EvaluationReportWriter {
     String render(EvaluationRun run) {
         EvaluationRunManifest manifest = run.manifest();
         StringBuilder markdown = new StringBuilder()
-                .append("# V3 governed evaluation report\n\n")
+                .append("# Governed evaluation report\n\n")
                 .append("- Schema: `").append(manifest.schemaVersion()).append("`\n")
                 .append("- Application: `").append(manifest.applicationVersion()).append("`\n")
                 .append("- Provider: `").append(manifest.provider()).append("`\n")

@@ -36,10 +36,13 @@ class ServiceOperationsAnalyticsToolsTest {
     void returnsGovernedOverallEvidence() {
         ToolResponse<OverallSlaEvidence> response = tools.getOverallSlaPerformance();
 
-        assertThat(response.contractVersion()).isEqualTo("1.0.0");
-        assertThat(response.snapshotId()).isEqualTo("fsoa-2026-q2-v1");
-        assertThat(response.evidence().slaAttainmentRatePercent()).isEqualByComparingTo("92.00");
-        assertThat(response.evidence().slaBreachRatePercent()).isEqualByComparingTo("8.00");
+        assertThat(response.contractVersion()).isEqualTo("2.0.0");
+        assertThat(response.snapshotId()).isEqualTo("fsoa-2026-01-01-2026-03-31-v1");
+        assertThat(response.evidence().eligibleOperations()).isEqualTo(833);
+        assertThat(response.evidence().slaAttainmentRatePercent()).isEqualByComparingTo("95.92");
+        assertThat(response.evidence().slaBreachRatePercent()).isEqualByComparingTo("4.08");
+        assertThat(response.provenance().producerApplication())
+                .isEqualTo("fabric-service-operations-analytics");
         assertBoundaryPresent(response.interpretationBoundary());
     }
 
@@ -47,11 +50,12 @@ class ServiceOperationsAnalyticsToolsTest {
     void ordersServiceComparisonByHighestBreachRate() {
         ToolResponse<ServiceComparisonEvidence> response = tools.compareServiceSlaPerformance();
 
-        assertThat(response.evidence().services())
-                .extracting(ServiceSlaEvidence::service)
-                .containsExactly("billing", "provisioning", "support");
-        assertThat(response.evidence().services().getFirst().slaBreachRatePercent())
-                .isEqualByComparingTo("15.20");
+        assertThat(response.evidence().comparisonDimension()).isEqualTo("assigned_team");
+        assertThat(response.evidence().groups())
+                .extracting(GroupSlaEvidence::group)
+                .containsExactly("network_ops", "data_platform", "business_apps", "service_desk", "workplace");
+        assertThat(response.evidence().groups().getFirst().slaBreachRatePercent())
+                .isEqualByComparingTo("6.98");
         assertBoundaryPresent(response.interpretationBoundary());
     }
 
@@ -59,7 +63,7 @@ class ServiceOperationsAnalyticsToolsTest {
         assertThat(boundary).isNotNull();
         assertThat(boundary.supportedInterpretations()).isNotEmpty();
         assertThat(boundary.unsupportedInterpretations())
-                .anyMatch(value -> value.toLowerCase().contains("root causes"));
+                .anyMatch(value -> value.toLowerCase().contains("root cause"));
         assertThat(boundary.requiredLanguage()).contains("observational");
     }
 }

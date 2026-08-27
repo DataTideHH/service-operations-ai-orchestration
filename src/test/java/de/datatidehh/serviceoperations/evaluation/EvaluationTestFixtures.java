@@ -24,7 +24,7 @@ final class EvaluationTestFixtures {
     static EvaluationRunManifest manifest(Map<String, String> fingerprints) {
         return new EvaluationRunManifest(
                 EvaluationRunManifestFactory.SCHEMA_VERSION,
-                "0.3.0",
+                "0.4.0",
                 "test-provider",
                 "test-model",
                 "test-revision",

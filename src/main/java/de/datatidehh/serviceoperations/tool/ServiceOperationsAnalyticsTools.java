@@ -2,7 +2,7 @@ package de.datatidehh.serviceoperations.tool;
 
 import de.datatidehh.serviceoperations.snapshot.AnalyticsSnapshot;
 import de.datatidehh.serviceoperations.snapshot.AnalyticsSnapshotRepository;
-import de.datatidehh.serviceoperations.snapshot.ServiceMetric;
+import de.datatidehh.serviceoperations.snapshot.ComparisonGroupMetric;
 import de.datatidehh.serviceoperations.evaluation.ToolInvocationRecorder;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.stereotype.Component;
@@ -14,8 +14,6 @@ import java.util.List;
 
 @Component
 public class ServiceOperationsAnalyticsTools {
-
-    private static final InterpretationBoundary BOUNDARY = InterpretationBoundary.governedSlaBoundary();
 
     private final AnalyticsSnapshotRepository snapshotRepository;
     private final ToolInvocationRecorder invocationRecorder;
@@ -34,35 +32,37 @@ public class ServiceOperationsAnalyticsTools {
             """)
     public ToolResponse<OverallSlaEvidence> getOverallSlaPerformance() {
         AnalyticsSnapshot snapshot = snapshotRepository.get();
-        int handled = snapshot.handledOperations();
+        int eligible = snapshot.eligibleOperations();
         int withinSla = snapshot.withinSlaOperations();
-        int breached = handled - withinSla;
+        int breached = eligible - withinSla;
 
         ToolResponse<OverallSlaEvidence> response = envelope(snapshot, new OverallSlaEvidence(
                 "sla_attainment_rate",
                 snapshot.metricDefinition(),
-                handled,
+                snapshot.metricEligiblePopulation(),
+                eligible,
                 withinSla,
                 breached,
-                percent(withinSla, handled),
-                percent(breached, handled)));
+                percent(withinSla, eligible),
+                percent(breached, eligible)));
         invocationRecorder.record("get_overall_sla_performance", response);
         return response;
     }
 
     @Tool(name = "compare_service_sla_performance", description = """
-            Return governed SLA evidence for every service in the pinned reporting snapshot.
-            Use for comparisons, including highest breach rate or lowest attainment rate.
-            Results are ordered by breach rate descending. 'Worst' is ambiguous unless the user names a metric.
+            Return governed SLA evidence for every assigned team in the pinned reporting snapshot.
+            Use for assigned-team comparisons, including highest breach rate or lowest attainment rate.
+            Results identify the comparison dimension and are ordered by breach rate descending.
+            'Worst' is ambiguous unless the user names a metric.
             Preserve the interpretation boundary and do not infer causes for observed differences.
             """)
     public ToolResponse<ServiceComparisonEvidence> compareServiceSlaPerformance() {
         AnalyticsSnapshot snapshot = snapshotRepository.get();
-        List<ServiceSlaEvidence> services = snapshot.services().stream()
-                .sorted(Comparator.comparing(ServiceMetric::slaBreachRatePercent).reversed())
-                .map(metric -> new ServiceSlaEvidence(
-                        metric.service(),
-                        metric.handledOperations(),
+        List<GroupSlaEvidence> groups = snapshot.groups().stream()
+                .sorted(Comparator.comparing(ComparisonGroupMetric::slaBreachRatePercent).reversed())
+                .map(metric -> new GroupSlaEvidence(
+                        metric.group(),
+                        metric.eligibleOperations(),
                         metric.withinSlaOperations(),
                         metric.breachedOperations(),
                         metric.slaAttainmentRatePercent(),
@@ -71,9 +71,11 @@ public class ServiceOperationsAnalyticsTools {
 
         ToolResponse<ServiceComparisonEvidence> response = envelope(snapshot, new ServiceComparisonEvidence(
                 "sla_breach_rate",
-                "breached_operations / handled_operations",
+                "sla_breaches / closed_requests",
+                snapshot.metricEligiblePopulation(),
+                snapshot.comparisonDimension(),
                 "sla_breach_rate_percent descending",
-                services));
+                groups));
         invocationRecorder.record("compare_service_sla_performance", response);
         return response;
     }
@@ -90,7 +92,11 @@ public class ServiceOperationsAnalyticsTools {
                 snapshot.snapshotId(),
                 snapshot.asOfDate(),
                 snapshot.period(),
+                snapshot.provenance(),
                 evidence,
-                BOUNDARY);
+                new InterpretationBoundary(
+                        snapshot.interpretationBoundary().supportedInterpretations(),
+                        snapshot.interpretationBoundary().unsupportedInterpretations(),
+                        snapshot.interpretationBoundary().requiredLanguage()));
     }
 }

@@ -25,11 +25,11 @@ class EvaluationPromptCatalogTest {
     }
 
     @Test
-    void fingerprintsEveryGovernedV3Resource() {
+    void fingerprintsEveryGovernedResource() {
         var fingerprints = new ResourceFingerprintService()
                 .sha256(EvaluationRunManifestFactory.GOVERNED_RESOURCE_PATHS);
 
-        assertThat(fingerprints).hasSize(5);
+        assertThat(fingerprints).hasSize(6);
         assertThat(fingerprints.values()).allMatch(value -> value.matches("[0-9a-f]{64}"));
     }
 }

@@ -37,7 +37,7 @@ jobs:
           distribution: temurin
           java-version: "21"
           cache: maven
-      - name: Build deterministic V1/V2/V3 checks
+      - name: Build deterministic governed checks
         run: ./mvnw --batch-mode --no-transfer-progress verify
       - name: Run model-dependent evaluation
         id: evaluation

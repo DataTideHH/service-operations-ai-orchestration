@@ -5,12 +5,19 @@ import org.springframework.stereotype.Component;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 @Component
 public class EvaluationReportValidator {
 
     private static final int EXPECTED_CASE_COUNT = 4;
+    private static final List<String> V3_GOVERNED_RESOURCE_PATHS = List.of(
+            "analytics/service-operations-snapshot-v1.properties",
+            "evaluation/evaluation-cases-v2.properties",
+            EvaluationPromptCatalog.ANSWER_SYSTEM_PATH,
+            EvaluationPromptCatalog.JUDGE_SYSTEM_PATH,
+            EvaluationPromptCatalog.JUDGE_CASE_PATH);
     private final EvaluationJsonCodec jsonCodec;
 
     public EvaluationReportValidator(EvaluationJsonCodec jsonCodec) {
@@ -43,12 +50,20 @@ public class EvaluationReportValidator {
         for (String prompt : EvaluationRunManifestFactory.PROMPT_VERSIONS.keySet()) {
             require(manifest.promptVersions().get(prompt), "manifest.promptVersions." + prompt, violations);
         }
-        for (String path : EvaluationRunManifestFactory.GOVERNED_RESOURCE_PATHS) {
+        List<String> requiredResources = manifest.applicationVersion().startsWith("0.3.")
+                ? V3_GOVERNED_RESOURCE_PATHS
+                : EvaluationRunManifestFactory.GOVERNED_RESOURCE_PATHS;
+        for (String path : requiredResources) {
             String fingerprint = manifest.resourceFingerprints().get(path);
             if (fingerprint == null || !fingerprint.matches("[0-9a-f]{64}")) {
                 violations.add("missing or invalid SHA-256 fingerprint: " + path);
             }
         }
+        manifest.resourceFingerprints().forEach((path, fingerprint) -> {
+            if (path == null || path.isBlank() || fingerprint == null || !fingerprint.matches("[0-9a-f]{64}")) {
+                violations.add("resource fingerprints must have non-blank paths and valid SHA-256 values");
+            }
+        });
         if (run.results().size() != EXPECTED_CASE_COUNT) {
             violations.add("expected " + EXPECTED_CASE_COUNT + " cases but found " + run.results().size());
         }

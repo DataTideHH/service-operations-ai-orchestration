@@ -24,7 +24,7 @@ public class EvaluationReportValidationRunner implements CommandLineRunner {
     @Override
     public void run(String... args) {
         EvaluationRun run = validator.readAndValidate(report);
-        System.out.printf("Valid V3 report: %s (%d/%d passed).%n",
+        System.out.printf("Valid governed report: %s (%d/%d passed).%n",
                 report.toAbsolutePath(), run.passedCount(), run.results().size());
     }
 }

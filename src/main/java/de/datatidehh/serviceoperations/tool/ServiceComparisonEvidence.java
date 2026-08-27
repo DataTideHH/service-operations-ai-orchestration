@@ -5,10 +5,12 @@ import java.util.List;
 public record ServiceComparisonEvidence(
         String metric,
         String definition,
+        String eligiblePopulation,
+        String comparisonDimension,
         String ordering,
-        List<ServiceSlaEvidence> services) {
+        List<GroupSlaEvidence> groups) {
 
     public ServiceComparisonEvidence {
-        services = List.copyOf(services);
+        groups = List.copyOf(groups);
     }
 }

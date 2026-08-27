@@ -61,7 +61,7 @@ public class LlmEvaluationRunner implements CommandLineRunner {
         EvaluationRun run = new EvaluationRun(manifestFactory.create(provider, model, runAt), results);
         EvaluationReportArtifacts reports = reportWriter.write(run, outputDirectory);
         invocationRecorder.clear();
-        System.out.printf("V3 evaluation: %d/%d passed. Reports: %s, %s%n",
+        System.out.printf("Governed evaluation: %d/%d passed. Reports: %s, %s%n",
                 run.passedCount(), run.results().size(),
                 reports.markdown().toAbsolutePath(), reports.json().toAbsolutePath());
 

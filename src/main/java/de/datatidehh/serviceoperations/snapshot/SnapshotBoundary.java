@@ -1,13 +1,13 @@
-package de.datatidehh.serviceoperations.tool;
+package de.datatidehh.serviceoperations.snapshot;
 
 import java.util.List;
 
-public record InterpretationBoundary(
+public record SnapshotBoundary(
         List<String> supportedInterpretations,
         List<String> unsupportedInterpretations,
         String requiredLanguage) {
 
-    public InterpretationBoundary {
+    public SnapshotBoundary {
         supportedInterpretations = List.copyOf(supportedInterpretations);
         unsupportedInterpretations = List.copyOf(unsupportedInterpretations);
     }

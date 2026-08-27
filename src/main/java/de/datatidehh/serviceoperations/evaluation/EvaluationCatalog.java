@@ -13,7 +13,7 @@ import java.util.Properties;
 @Component
 public class EvaluationCatalog {
 
-    static final String LOCATION = "evaluation/evaluation-cases-v2.properties";
+    static final String LOCATION = "evaluation/evaluation-cases-v4.properties";
 
     public List<EvaluationCase> cases() {
         Properties properties = new Properties();
@@ -21,7 +21,7 @@ public class EvaluationCatalog {
             properties.load(input);
         }
         catch (IOException exception) {
-            throw new UncheckedIOException("Could not load V2 evaluation catalog", exception);
+            throw new UncheckedIOException("Could not load versioned evaluation catalog", exception);
         }
 
         return Arrays.stream(required(properties, "cases").split(","))

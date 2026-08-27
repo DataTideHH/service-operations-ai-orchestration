@@ -15,4 +15,6 @@ The four V1 cases cover:
 
 ## Offline reference
 
-`offline-reference/` contains a clearly labelled, curated simulation produced without a provider or API credentials. It exercises the governed tools and the complete V3 report, validation, and comparison pipeline. It is not evidence of model quality and must not be described as a live LLM result.
+`offline-reference-v3/` preserves the historical V3 simulation. `offline-reference-v4/` contains the current simulation against the imported analytics handoff. Both are produced without provider credentials and are not evidence of model quality.
+
+The two baselines are intentionally incompatible: V4 changes the governed snapshot, adds the producer schema to the manifest fingerprint set and updates the evaluation catalog to the reconciled assigned-team evidence.
