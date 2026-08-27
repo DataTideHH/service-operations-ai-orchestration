@@ -36,16 +36,30 @@ public class EvaluationReportWriter {
 
     String render(EvaluationRun run) {
         EvaluationRunManifest manifest = run.manifest();
+        boolean offlineReference = OfflineEvaluationService.PROVIDER.equals(manifest.provider());
         StringBuilder markdown = new StringBuilder()
-                .append("# Governed evaluation report\n\n")
+                .append(offlineReference
+                        ? "# Offline evaluation pipeline report\n\n"
+                        : "# Governed LLM evaluation report\n\n")
                 .append("- Schema: `").append(manifest.schemaVersion()).append("`\n")
                 .append("- Application: `").append(manifest.applicationVersion()).append("`\n")
                 .append("- Provider: `").append(manifest.provider()).append("`\n")
                 .append("- Model: `").append(manifest.model()).append("`\n")
                 .append("- Source revision: `").append(manifest.sourceRevision()).append("`\n")
-                .append("- Run at: `").append(manifest.runAt()).append("`\n")
-                .append("- Result: **").append(run.passed() ? "PASS" : "FAIL").append("** (")
-                .append(run.passedCount()).append('/').append(run.results().size()).append(")\n\n")
+                .append("- Run at: `").append(manifest.runAt()).append("`\n");
+        if (offlineReference) {
+            markdown.append("- Pipeline check: **")
+                    .append(run.results().size()).append('/').append(run.results().size())
+                    .append(" cases executed — no model involved**\n")
+                    .append("- Deterministic reference checks: **")
+                    .append(run.passedCount()).append('/').append(run.results().size())
+                    .append(" passed**\n\n");
+        }
+        else {
+            markdown.append("- Result: **").append(run.passed() ? "PASS" : "FAIL").append("** (")
+                    .append(run.passedCount()).append('/').append(run.results().size()).append(")\n\n");
+        }
+        markdown
                 .append("## Prompt versions\n\n");
 
         manifest.promptVersions().entrySet().stream()
@@ -63,6 +77,7 @@ public class EvaluationReportWriter {
         for (EvaluationCaseResult result : run.results()) {
             EvaluationCase evaluationCase = result.evaluationCase();
             markdown.append("## ").append(evaluationCase.id()).append(" — ")
+                    .append(offlineReference ? "REFERENCE CHECK " : "")
                     .append(result.assessment().passed() ? "PASS" : "FAIL").append("\n\n")
                     .append("**Question:** ").append(evaluationCase.question()).append("\n\n")
                     .append("**Expected tool:** `").append(evaluationCase.expectedTool()).append("`\n\n")
@@ -79,9 +94,13 @@ public class EvaluationReportWriter {
                 }
             }
 
-            markdown.append("### Observed answer\n\n")
+            markdown.append(offlineReference
+                            ? "### Reference answer — authored, not model-generated\n\n"
+                            : "### Observed answer\n\n")
                     .append(result.observedAnswer()).append("\n\n")
-                    .append("### Automatic assessment\n\n")
+                    .append(offlineReference
+                            ? "### Deterministic reference assessment\n\n"
+                            : "### Automatic assessment\n\n")
                     .append("- Passed: `").append(result.assessment().passed()).append("`\n")
                     .append("- Rationale: ").append(result.assessment().rationale()).append("\n")
                     .append("- Satisfied criteria: ").append(result.assessment().satisfiedCriteria()).append("\n")
