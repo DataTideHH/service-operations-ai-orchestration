@@ -4,11 +4,12 @@ This directory contains the credential-free V4 reference run created on 2026-08-
 
 - Provider: `offline-simulation`
 - Model: `deterministic-reference-v2`
-- Cases: 4/4 passed
+- Pipeline check: 4/4 cases executed, no model involved
+- Deterministic reference checks: 4/4 passed
 - JSON validation: passed
 - Self-comparison smoke test: passed, with compatible fingerprints and no regressions
 
-The answers and assessments are curated deterministic references. They exercise the real governed Java tools, the imported producer snapshot and schema, and the complete report, validation, and comparison pipeline without an API key or provider call. They are not evidence of LLM or prompt quality.
+The answers are authored references and the assessments are deterministic checks. They exercise the real governed Java tools, the imported producer snapshot and schema, and the complete report, validation, and comparison pipeline without an API key or provider call. They are not observations of model behavior or evidence of LLM or prompt quality.
 
 Files:
 
